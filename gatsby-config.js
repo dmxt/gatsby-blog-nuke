@@ -37,7 +37,6 @@ module.exports = {
             options: {
               maxWidth: 800,
               linkImagesToOriginal: false,
-              sizeByPixelDensity: true,
               showCaptions: true
             }
           },
@@ -92,7 +91,7 @@ module.exports = {
             query: `
               {
                 allMarkdownRemark(
-                  sort: { order: DESC, fields: [frontmatter___date] },
+                  sort: {frontmatter: {date: DESC}}
                 ) {
                   nodes {
                     excerpt
