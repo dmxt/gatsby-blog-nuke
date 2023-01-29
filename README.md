@@ -6,29 +6,35 @@
 <h1 align="center">
   dmxt blog on Gatsby
 </h1>
-<p align="center">Open sourced</p>
+<p align="center">Open sourced (v5)</p>
 
 ## Quick start 🚀
 
+### Official Documentation
+https://www.gatsbyjs.com/docs
+
+You may find this handy :)
+
 ### 1. Install Gatsby on your system
 
-1. If you use npm, run: `npm i -g gatsby-cli`
-2. If you use yarn, run: `yarn global add gatsby-cli`
-3. Check if Gatsby CLI is installed correctly by running: `gatsby -v`
+**1.a**. If you use npm, run: `npm i -g gatsby-cli`
+**2.b.** If you use yarn, run: `yarn global add gatsby-cli`
+**3.** Check if Gatsby CLI is installed correctly by running: `gatsby -v`
 
 ![](content/images/gatsby-version-cli.png)
 
 **Note:** It does not need to have the exact same version as shown in a screenshot.
 
-If it's not working, please open an [issue](https://github.com/dmxt/dmxt-blog/issues) on my repository or refer to an [official documentation](https://www.gatsbyjs.com/docs/tutorial/part-0/#gatsby-cli).
+If it's not working, please open an [issue](https://github.com/dmxt/dmxt-blog/issues) 
+on my repository or refer to an [official documentation](https://www.gatsbyjs.com/docs/tutorial/part-0/#gatsby-cli).
 
 ### 2. Pull a repository
 
 Run the following:
 
-    gatsby new my-blog-starter https://github.com/dmxt/dmxt-blog
+    gatsby new my-blog https://github.com/dmxt/dmxt-blog
 
-You can change "my-blog-starter" to your preferred folder name.
+**You can change `my-blog` to your preferred name** for a folder.
 
 ### 3. Start developing on live
 
@@ -40,7 +46,8 @@ gatsby develop
 
 - Your site is now running at `http://localhost:8000`
 
-- GraphQL is accessible at `http://localhost:8000/___graphql`. You can use this tool to experiment with querying your data.
+- GraphQL is accessible at `http://localhost:8000/___graphql`. 
+You can use this tool to experiment with querying your data.
 
 If you can access your site on that link, then congratulations, you got it working! 🎉
 
@@ -66,8 +73,9 @@ A quick look at the top-level files and directories you'll see in a Gatsby proje
     ├── gatsby-node.js
     ├── gatsby-ssr.js
     ├── LICENSE
-    ├── package-lock.json
+    ├── package-lock.json (remove if you use yarn)
     ├── package.json
+    ├── yarn.lock (if you use yarn)
     └── README.md
 
 1.  **`/node_modules`**: This directory contains all the modules of code that your project depends on (npm packages) are automatically installed.

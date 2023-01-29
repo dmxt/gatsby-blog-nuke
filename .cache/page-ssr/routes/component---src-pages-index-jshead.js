@@ -3,6 +3,129 @@ exports.id = "component---src-pages-index-jshead";
 exports.ids = ["component---src-pages-index-jshead"];
 exports.modules = {
 
+/***/ "./node_modules/camelcase/index.js":
+/*!*****************************************!*\
+  !*** ./node_modules/camelcase/index.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+
+
+const UPPERCASE = /[\p{Lu}]/u;
+const LOWERCASE = /[\p{Ll}]/u;
+const LEADING_CAPITAL = /^[\p{Lu}](?![\p{Lu}])/gu;
+const IDENTIFIER = /([\p{Alpha}\p{N}_]|$)/u;
+const SEPARATORS = /[_.\- ]+/;
+
+const LEADING_SEPARATORS = new RegExp('^' + SEPARATORS.source);
+const SEPARATORS_AND_IDENTIFIER = new RegExp(SEPARATORS.source + IDENTIFIER.source, 'gu');
+const NUMBERS_AND_IDENTIFIER = new RegExp('\\d+' + IDENTIFIER.source, 'gu');
+
+const preserveCamelCase = (string, toLowerCase, toUpperCase) => {
+	let isLastCharLower = false;
+	let isLastCharUpper = false;
+	let isLastLastCharUpper = false;
+
+	for (let i = 0; i < string.length; i++) {
+		const character = string[i];
+
+		if (isLastCharLower && UPPERCASE.test(character)) {
+			string = string.slice(0, i) + '-' + string.slice(i);
+			isLastCharLower = false;
+			isLastLastCharUpper = isLastCharUpper;
+			isLastCharUpper = true;
+			i++;
+		} else if (isLastCharUpper && isLastLastCharUpper && LOWERCASE.test(character)) {
+			string = string.slice(0, i - 1) + '-' + string.slice(i - 1);
+			isLastLastCharUpper = isLastCharUpper;
+			isLastCharUpper = false;
+			isLastCharLower = true;
+		} else {
+			isLastCharLower = toLowerCase(character) === character && toUpperCase(character) !== character;
+			isLastLastCharUpper = isLastCharUpper;
+			isLastCharUpper = toUpperCase(character) === character && toLowerCase(character) !== character;
+		}
+	}
+
+	return string;
+};
+
+const preserveConsecutiveUppercase = (input, toLowerCase) => {
+	LEADING_CAPITAL.lastIndex = 0;
+
+	return input.replace(LEADING_CAPITAL, m1 => toLowerCase(m1));
+};
+
+const postProcess = (input, toUpperCase) => {
+	SEPARATORS_AND_IDENTIFIER.lastIndex = 0;
+	NUMBERS_AND_IDENTIFIER.lastIndex = 0;
+
+	return input.replace(SEPARATORS_AND_IDENTIFIER, (_, identifier) => toUpperCase(identifier))
+		.replace(NUMBERS_AND_IDENTIFIER, m => toUpperCase(m));
+};
+
+const camelCase = (input, options) => {
+	if (!(typeof input === 'string' || Array.isArray(input))) {
+		throw new TypeError('Expected the input to be `string | string[]`');
+	}
+
+	options = {
+		pascalCase: false,
+		preserveConsecutiveUppercase: false,
+		...options
+	};
+
+	if (Array.isArray(input)) {
+		input = input.map(x => x.trim())
+			.filter(x => x.length)
+			.join('-');
+	} else {
+		input = input.trim();
+	}
+
+	if (input.length === 0) {
+		return '';
+	}
+
+	const toLowerCase = options.locale === false ?
+		string => string.toLowerCase() :
+		string => string.toLocaleLowerCase(options.locale);
+	const toUpperCase = options.locale === false ?
+		string => string.toUpperCase() :
+		string => string.toLocaleUpperCase(options.locale);
+
+	if (input.length === 1) {
+		return options.pascalCase ? toUpperCase(input) : toLowerCase(input);
+	}
+
+	const hasUpperCase = input !== toLowerCase(input);
+
+	if (hasUpperCase) {
+		input = preserveCamelCase(input, toLowerCase, toUpperCase);
+	}
+
+	input = input.replace(LEADING_SEPARATORS, '');
+
+	if (options.preserveConsecutiveUppercase) {
+		input = preserveConsecutiveUppercase(input, toLowerCase);
+	} else {
+		input = toLowerCase(input);
+	}
+
+	if (options.pascalCase) {
+		input = toUpperCase(input.charAt(0)) + input.slice(1);
+	}
+
+	return postProcess(input, toUpperCase);
+};
+
+module.exports = camelCase;
+// TODO: Remove this for the next major release
+module.exports["default"] = camelCase;
+
+
+/***/ }),
+
 /***/ "./node_modules/gatsby-plugin-image/dist/gatsby-image.module.js":
 /*!**********************************************************************!*\
   !*** ./node_modules/gatsby-plugin-image/dist/gatsby-image.module.js ***!
@@ -25,7 +148,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var camelcase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! camelcase */ "./node_modules/gatsby-plugin-image/node_modules/camelcase/index.js");
+/* harmony import */ var camelcase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! camelcase */ "./node_modules/camelcase/index.js");
 /* harmony import */ var camelcase__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(camelcase__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
 /* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_2__);
@@ -694,71 +817,6 @@ U.displayName = "StaticImage", U.propTypes = Z;
 
 /***/ }),
 
-/***/ "./node_modules/gatsby-plugin-image/node_modules/camelcase/index.js":
-/*!**************************************************************************!*\
-  !*** ./node_modules/gatsby-plugin-image/node_modules/camelcase/index.js ***!
-  \**************************************************************************/
-/***/ ((module) => {
-
-
-
-const preserveCamelCase = string => {
-  let isLastCharLower = false;
-  let isLastCharUpper = false;
-  let isLastLastCharUpper = false;
-  for (let i = 0; i < string.length; i++) {
-    const character = string[i];
-    if (isLastCharLower && /[a-zA-Z]/.test(character) && character.toUpperCase() === character) {
-      string = string.slice(0, i) + '-' + string.slice(i);
-      isLastCharLower = false;
-      isLastLastCharUpper = isLastCharUpper;
-      isLastCharUpper = true;
-      i++;
-    } else if (isLastCharUpper && isLastLastCharUpper && /[a-zA-Z]/.test(character) && character.toLowerCase() === character) {
-      string = string.slice(0, i - 1) + '-' + string.slice(i - 1);
-      isLastLastCharUpper = isLastCharUpper;
-      isLastCharUpper = false;
-      isLastCharLower = true;
-    } else {
-      isLastCharLower = character.toLowerCase() === character && character.toUpperCase() !== character;
-      isLastLastCharUpper = isLastCharUpper;
-      isLastCharUpper = character.toUpperCase() === character && character.toLowerCase() !== character;
-    }
-  }
-  return string;
-};
-const camelCase = (input, options) => {
-  if (!(typeof input === 'string' || Array.isArray(input))) {
-    throw new TypeError('Expected the input to be `string | string[]`');
-  }
-  options = Object.assign({
-    pascalCase: false
-  }, options);
-  const postProcess = x => options.pascalCase ? x.charAt(0).toUpperCase() + x.slice(1) : x;
-  if (Array.isArray(input)) {
-    input = input.map(x => x.trim()).filter(x => x.length).join('-');
-  } else {
-    input = input.trim();
-  }
-  if (input.length === 0) {
-    return '';
-  }
-  if (input.length === 1) {
-    return options.pascalCase ? input.toUpperCase() : input.toLowerCase();
-  }
-  const hasUpperCase = input !== input.toLowerCase();
-  if (hasUpperCase) {
-    input = preserveCamelCase(input);
-  }
-  input = input.replace(/^[_.\- ]+/, '').toLowerCase().replace(/[_.\- ]+(\w|$)/g, (_, p1) => p1.toUpperCase()).replace(/\d+(\w|$)/g, m => m.toUpperCase());
-  return postProcess(input);
-};
-module.exports = camelCase;
-// TODO: Remove this for the next major release
-module.exports["default"] = camelCase;
-
-/***/ }),
-
 /***/ "./src/components/bio.js":
 /*!*******************************!*\
   !*** ./src/components/bio.js ***!
@@ -802,7 +860,7 @@ const Bio = () => {
     height: 50,
     quality: 100,
     alt: "Profile picture",
-    __imageData: __webpack_require__(/*! ./.cache/caches/gatsby-plugin-image/1099116467.json */ "./.cache/caches/gatsby-plugin-image/1099116467.json")
+    __imageData: __webpack_require__(/*! ./.cache/caches/gatsby-plugin-image/1211671256.json */ "./.cache/caches/gatsby-plugin-image/1211671256.json")
   }), (author === null || author === void 0 ? void 0 : author.name) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("p", null, `Hello! I'm Dana. I'm a designer and front-end developer based in Miami, FL. This is my blog.`, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("br", null), `Check out my main `, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("a", {
     href: `${siteUrl || ``} `,
     className: `brand-dmxt`
@@ -1021,9 +1079,9 @@ const pageQuery = "2074577117";
 
 /***/ }),
 
-/***/ "./.cache/caches/gatsby-plugin-image/1099116467.json":
+/***/ "./.cache/caches/gatsby-plugin-image/1211671256.json":
 /*!***********************************************************!*\
-  !*** ./.cache/caches/gatsby-plugin-image/1099116467.json ***!
+  !*** ./.cache/caches/gatsby-plugin-image/1211671256.json ***!
   \***********************************************************/
 /***/ ((module) => {
 
@@ -1047,7 +1105,7 @@ module.exports = JSON.parse('{"data":{"site":{"siteMetadata":{"title":"dmxt\'s b
   \*********************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"data":{"site":{"siteMetadata":{"siteUrl":"https://dmxt.org/","author":{"name":"Dana","summary":"Hello! I\'m Dana. I\'m a designer and front-end developer based in Miami, FL."},"social":{"twitter":"dmxt","dribbble":"dmxt"}}}}}');
+module.exports = JSON.parse('{"data":{"site":{"siteMetadata":{"siteUrl":"https://dmxt.org","author":{"name":"Dana","summary":"Hello! I\'m Dana. I\'m a designer and front-end developer based in Miami, FL."},"social":{"twitter":"dmxt","dribbble":"dmxt"}}}}}');
 
 /***/ })
 

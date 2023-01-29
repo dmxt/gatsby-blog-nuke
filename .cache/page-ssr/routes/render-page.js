@@ -1567,10 +1567,14 @@ var ScrollHandler = /*#__PURE__*/function (_React$Component) {
     if (key) {
       scrollPosition = this._stateStorage.read(this.props.location, key);
     }
-    if (scrollPosition) {
-      this.windowScroll(scrollPosition, undefined);
-    } else if (hash) {
+
+    /** If a hash is present in the browser url as the component mounts (i.e. the user is navigating
+     * from an external website) then scroll to the hash instead of any previously stored scroll
+     * position. */
+    if (hash) {
       this.scrollToHash(decodeURI(hash), undefined);
+    } else if (scrollPosition) {
+      this.windowScroll(scrollPosition, undefined);
     }
   };
   _proto.componentWillUnmount = function componentWillUnmount() {
@@ -1801,7 +1805,6 @@ exports.components = {
   "component---cache-dev-404-page-js": () => __webpack_require__.e(/*! import() | component---cache-dev-404-page-js */ "component---cache-dev-404-page-js").then(__webpack_require__.bind(__webpack_require__, /*! ./../../dev-404-page.js?export=default */ "./.cache/dev-404-page.js?export=default")),
   "component---src-pages-404-js": () => __webpack_require__.e(/*! import() | component---src-pages-404-js */ "component---src-pages-404-js").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/404.js?export=default */ "./src/pages/404.js?export=default")),
   "component---src-pages-index-js": () => __webpack_require__.e(/*! import() | component---src-pages-index-js */ "component---src-pages-index-js").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/index.js?export=default */ "./src/pages/index.js?export=default")),
-  "component---src-pages-using-typescript-tsx": () => __webpack_require__.e(/*! import() | component---src-pages-using-typescript-tsx */ "component---src-pages-using-typescript-tsx").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/using-typescript.tsx?export=default */ "./src/pages/using-typescript.tsx?export=default")),
   "component---src-templates-blog-post-js": () => __webpack_require__.e(/*! import() | component---src-templates-blog-post-js */ "component---src-templates-blog-post-js").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/templates/blog-post.js?export=default */ "./src/templates/blog-post.js?export=default"))
 };
 
@@ -1809,7 +1812,6 @@ exports.head = {
   "component---cache-dev-404-page-js": () => __webpack_require__.e(/*! import() | component---cache-dev-404-page-jshead */ "component---cache-dev-404-page-jshead").then(__webpack_require__.bind(__webpack_require__, /*! ./../../dev-404-page.js?export=head */ "./.cache/dev-404-page.js?export=head")),
   "component---src-pages-404-js": () => __webpack_require__.e(/*! import() | component---src-pages-404-jshead */ "component---src-pages-404-jshead").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/404.js?export=head */ "./src/pages/404.js?export=head")),
   "component---src-pages-index-js": () => __webpack_require__.e(/*! import() | component---src-pages-index-jshead */ "component---src-pages-index-jshead").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/index.js?export=head */ "./src/pages/index.js?export=head")),
-  "component---src-pages-using-typescript-tsx": () => __webpack_require__.e(/*! import() | component---src-pages-using-typescript-tsxhead */ "component---src-pages-using-typescript-tsxhead").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/pages/using-typescript.tsx?export=head */ "./src/pages/using-typescript.tsx?export=head")),
   "component---src-templates-blog-post-js": () => __webpack_require__.e(/*! import() | component---src-templates-blog-post-jshead */ "component---src-templates-blog-post-jshead").then(__webpack_require__.bind(__webpack_require__, /*! ./../../../src/templates/blog-post.js?export=head */ "./src/templates/blog-post.js?export=head"))
 };
 
@@ -2535,6 +2537,12 @@ const createPageDataUrl = rawPath => {
   const fixedPath = path === `/` ? `index` : stripSurroundingSlashes(path);
   return `${""}/page-data/${fixedPath}/page-data.json${maybeSearch ? `?${maybeSearch}` : ``}`;
 };
+
+/**
+ * Utility to check the path that goes into doFetch for e.g. potential malicious intentions.
+ * It checks for "//" because with this you could do a fetch request to a different domain.
+ */
+const shouldAbortFetch = rawPath => rawPath.startsWith(`//`);
 function doFetch(url, method = `GET`) {
   return new Promise(resolve => {
     const req = new XMLHttpRequest();
@@ -2839,10 +2847,10 @@ class BaseLoader {
       const page = this.pageDb.get(pagePath);
       if (true) {
         if (page.error) {
-          return {
+          return Promise.resolve({
             error: page.error,
             status: page.status
-          };
+          });
         }
         return Promise.resolve(page.payload);
       }
@@ -3245,6 +3253,9 @@ class ProdLoader extends BaseLoader {
   loadPageDataJson(rawPath) {
     return super.loadPageDataJson(rawPath).then(data => {
       if (data.notFound) {
+        if (shouldAbortFetch(rawPath)) {
+          return data;
+        }
         // check if html file exist using HEAD request:
         // if it does we should navigate to it instead of showing 404
         return doFetch(rawPath, `HEAD`).then(req => {
@@ -3268,6 +3279,9 @@ class ProdLoader extends BaseLoader {
   loadPartialHydrationJson(rawPath) {
     return super.loadPartialHydrationJson(rawPath).then(data => {
       if (data.notFound) {
+        if (shouldAbortFetch(rawPath)) {
+          return data;
+        }
         // check if html file exist using HEAD request:
         // if it does we should navigate to it instead of showing 404
         return doFetch(rawPath, `HEAD`).then(req => {
@@ -10217,24 +10231,24 @@ if (false) {} else {
 /***/ }),
 
 /***/ "react-dom/server":
-/*!************************************************************************************!*\
-  !*** external "/Users/cmarts/www/dmxt-blog-dead/node_modules/react-dom/server.js" ***!
-  \************************************************************************************/
+/*!*******************************************************************************************!*\
+  !*** external "/Users/danielle/projects/dmxt-blog-dead/node_modules/react-dom/server.js" ***!
+  \*******************************************************************************************/
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("/Users/cmarts/www/dmxt-blog-dead/node_modules/react-dom/server.js");
+module.exports = require("/Users/danielle/projects/dmxt-blog-dead/node_modules/react-dom/server.js");
 
 /***/ }),
 
 /***/ "react":
-/*!*******************************************************************************!*\
-  !*** external "/Users/cmarts/www/dmxt-blog-dead/node_modules/react/index.js" ***!
-  \*******************************************************************************/
+/*!**************************************************************************************!*\
+  !*** external "/Users/danielle/projects/dmxt-blog-dead/node_modules/react/index.js" ***!
+  \**************************************************************************************/
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("/Users/cmarts/www/dmxt-blog-dead/node_modules/react/index.js");
+module.exports = require("/Users/danielle/projects/dmxt-blog-dead/node_modules/react/index.js");
 
 /***/ }),
 
@@ -10381,7 +10395,7 @@ module.exports = _setPrototypeOf, module.exports.__esModule = true, module.expor
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const PartytownSnippet = "/* Partytown 0.5.4 - MIT builder.io */\n!function(t,e,n,i,r,o,a,d,s,c,p,l){function u(){l||(l=1,\"/\"==(a=(o.lib||\"/~partytown/\")+(o.debug?\"debug/\":\"\"))[0]&&(s=e.querySelectorAll('script[type=\"text/partytown\"]'),i!=t?i.dispatchEvent(new CustomEvent(\"pt1\",{detail:t})):(d=setTimeout(w,1e4),e.addEventListener(\"pt0\",f),r?h(1):n.serviceWorker?n.serviceWorker.register(a+(o.swPath||\"partytown-sw.js\"),{scope:a}).then((function(t){t.active?h():t.installing&&t.installing.addEventListener(\"statechange\",(function(t){\"activated\"==t.target.state&&h()}))}),console.error):w())))}function h(t){c=e.createElement(t?\"script\":\"iframe\"),t||(c.setAttribute(\"style\",\"display:block;width:0;height:0;border:0;visibility:hidden\"),c.setAttribute(\"aria-hidden\",!0)),c.src=a+\"partytown-\"+(t?\"atomics.js?v=0.5.4\":\"sandbox-sw.html?\"+Date.now()),e.body.appendChild(c)}function w(t,n){for(f(),t=0;t<s.length;t++)(n=e.createElement(\"script\")).innerHTML=s[t].innerHTML,e.head.appendChild(n);c&&c.parentNode.removeChild(c)}function f(){clearTimeout(d)}o=t.partytown||{},i==t&&(o.forward||[]).map((function(e){p=t,e.split(\".\").map((function(e,n,i){p=p[i[n]]=n+1<i.length?\"push\"==i[n+1]?[]:p[i[n]]||{}:function(){(t._ptf=t._ptf||[]).push(i,arguments)}}))})),\"complete\"==e.readyState?u():(t.addEventListener(\"DOMContentLoaded\",u),t.addEventListener(\"load\",u))}(window,document,navigator,top,window.crossOriginIsolated);";
+const PartytownSnippet = "/* Partytown 0.7.5 - MIT builder.io */\n!function(t,e,n,i,r,o,a,d,s,c,p,l){function u(){l||(l=1,\"/\"==(a=(o.lib||\"/~partytown/\")+(o.debug?\"debug/\":\"\"))[0]&&(s=e.querySelectorAll('script[type=\"text/partytown\"]'),i!=t?i.dispatchEvent(new CustomEvent(\"pt1\",{detail:t})):(d=setTimeout(f,1e4),e.addEventListener(\"pt0\",w),r?h(1):n.serviceWorker?n.serviceWorker.register(a+(o.swPath||\"partytown-sw.js\"),{scope:a}).then((function(t){t.active?h():t.installing&&t.installing.addEventListener(\"statechange\",(function(t){\"activated\"==t.target.state&&h()}))}),console.error):f())))}function h(t){c=e.createElement(t?\"script\":\"iframe\"),t||(c.setAttribute(\"style\",\"display:block;width:0;height:0;border:0;visibility:hidden\"),c.setAttribute(\"aria-hidden\",!0)),c.src=a+\"partytown-\"+(t?\"atomics.js?v=0.7.5\":\"sandbox-sw.html?\"+Date.now()),e.body.appendChild(c)}function f(n,r){for(w(),i==t&&(o.forward||[]).map((function(e){delete t[e.split(\".\")[0]]})),n=0;n<s.length;n++)(r=e.createElement(\"script\")).innerHTML=s[n].innerHTML,e.head.appendChild(r);c&&c.parentNode.removeChild(c)}function w(){clearTimeout(d)}o=t.partytown||{},i==t&&(o.forward||[]).map((function(e){p=t,e.split(\".\").map((function(e,n,i){p=p[i[n]]=n+1<i.length?\"push\"==i[n+1]?[]:p[i[n]]||{}:function(){(t._ptf=t._ptf||[]).push(i,arguments)}}))})),\"complete\"==e.readyState?u():(t.addEventListener(\"DOMContentLoaded\",u),t.addEventListener(\"load\",u))}(window,document,navigator,top,window.crossOriginIsolated);";
 
 const createSnippet = (config, snippetCode) => {
     const { forward = [], ...filteredConfig } = config || {};
